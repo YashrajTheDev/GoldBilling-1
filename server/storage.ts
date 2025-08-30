@@ -208,9 +208,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async initializeSampleData(): Promise<void> {
-    // Check if customers already exist
-    const existingCustomers = await db.select({ count: count() }).from(customers);
-    if (existingCustomers[0]?.count > 0) return;
+    // Sample data initialization disabled - users will add their own customers
+    return;
 
     const sampleCustomers = [
       { customerId: "CU001", name: "Rajesh Kumar", phone: "+91 98765 43210", email: "rajesh@email.com", address: "123 Business Street", city: "Mumbai", state: "Maharashtra" },
