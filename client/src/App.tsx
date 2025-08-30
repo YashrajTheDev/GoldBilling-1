@@ -17,20 +17,24 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <Switch>
-          <ProtectedRoute path="/" component={Dashboard} />
-          <ProtectedRoute path="/customers" component={Customers} />
-          <ProtectedRoute path="/calculator" component={Calculator} />
-          <ProtectedRoute path="/invoicing" component={Invoicing} />
-          <ProtectedRoute path="/history" component={History} />
-          <Route path="/auth" component={AuthPage} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-    </div>
+    <Switch>
+      <Route path="/auth" component={AuthPage} />
+      <Route>
+        <div className="flex h-screen bg-background">
+          <Sidebar />
+          <main className="flex-1 overflow-auto">
+            <Switch>
+              <ProtectedRoute path="/" component={Dashboard} />
+              <ProtectedRoute path="/customers" component={Customers} />
+              <ProtectedRoute path="/calculator" component={Calculator} />
+              <ProtectedRoute path="/invoicing" component={Invoicing} />
+              <ProtectedRoute path="/history" component={History} />
+              <Route component={NotFound} />
+            </Switch>
+          </main>
+        </div>
+      </Route>
+    </Switch>
   );
 }
 
@@ -40,8 +44,15 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <div className="min-h-screen bg-background">
-            <Header />
-            <Router />
+            <Switch>
+              <Route path="/auth">
+                <AuthPage />
+              </Route>
+              <Route>
+                <Header />
+                <Router />
+              </Route>
+            </Switch>
           </div>
           <Toaster />
         </TooltipProvider>
