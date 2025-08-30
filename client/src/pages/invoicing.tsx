@@ -7,17 +7,14 @@ import type { InvoiceItem } from "@shared/schema";
 export interface InvoiceData {
   customerId: string;
   items: InvoiceItem[];
-  makingCharges: number;
-  taxPercentage: number;
-  dueDate?: Date;
+  paymentType: "gold" | "cash";
 }
 
 export default function Invoicing() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
     customerId: "",
     items: [],
-    makingCharges: 0,
-    taxPercentage: 3,
+    paymentType: "cash",
   });
 
   return (

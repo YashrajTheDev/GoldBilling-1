@@ -34,8 +34,7 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
       setInvoiceData({
         customerId: "",
         items: [],
-        makingCharges: 0,
-        taxPercentage: 3,
+        paymentType: "cash",
       });
     },
     onError: () => {
@@ -49,11 +48,8 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
 
   const addItem = () => {
     const newItem: InvoiceItem = {
-      description: "",
+      itemName: "",
       weight: 0,
-      purity: 0,
-      rate: 5250,
-      amount: 0,
     };
     setInvoiceData({
       ...invoiceData,
@@ -64,14 +60,6 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
   const updateItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
     const updatedItems = [...invoiceData.items];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
-    
-    // Calculate amount if weight, purity, or rate changed
-    if (field === 'weight' || field === 'purity' || field === 'rate') {
-      const item = updatedItems[index];
-      const pureGoldWeight = (item.weight * item.purity) / 100;
-      updatedItems[index].amount = pureGoldWeight * item.rate;
-    }
-    
     setInvoiceData({ ...invoiceData, items: updatedItems });
   };
 
@@ -99,20 +87,11 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
       return;
     }
 
-    const subtotal = invoiceData.items.reduce((sum, item) => sum + item.amount, 0) + invoiceData.makingCharges;
-    const taxAmount = (subtotal * invoiceData.taxPercentage) / 100;
-    const total = subtotal + taxAmount;
-
     createInvoice.mutate({
       customerId: invoiceData.customerId,
       items: invoiceData.items,
-      subtotal: subtotal.toFixed(2),
-      makingCharges: invoiceData.makingCharges.toFixed(2),
-      taxPercentage: invoiceData.taxPercentage.toFixed(2),
-      taxAmount: taxAmount.toFixed(2),
-      total: total.toFixed(2),
+      paymentType: invoiceData.paymentType,
       status: "pending",
-      dueDate: invoiceData.dueDate || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
     });
   };
 
@@ -177,83 +156,42 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
                 </div>
                 
                 <Input
-                  placeholder="Description"
-                  value={item.description}
-                  onChange={(e) => updateItem(index, 'description', e.target.value)}
-                  data-testid={`item-description-${index}`}
+                  placeholder="Item Name (e.g., Gold Ring, Necklace)"
+                  value={item.itemName}
+                  onChange={(e) => updateItem(index, 'itemName', e.target.value)}
+                  data-testid={`item-name-${index}`}
                 />
                 
-                <div className="grid grid-cols-3 gap-2">
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="Weight (g)"
-                    value={item.weight || ""}
-                    onChange={(e) => updateItem(index, 'weight', parseFloat(e.target.value) || 0)}
-                    data-testid={`item-weight-${index}`}
-                  />
-                  <Input
-                    type="number"
-                    step="0.1"
-                    placeholder="Purity (%)"
-                    value={item.purity || ""}
-                    onChange={(e) => updateItem(index, 'purity', parseFloat(e.target.value) || 0)}
-                    data-testid={`item-purity-${index}`}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Rate (₹)"
-                    value={item.rate || ""}
-                    onChange={(e) => updateItem(index, 'rate', parseFloat(e.target.value) || 0)}
-                    data-testid={`item-rate-${index}`}
-                  />
-                </div>
+                <Input
+                  type="number"
+                  step="0.001"
+                  placeholder="Weight (grams)"
+                  value={item.weight || ""}
+                  onChange={(e) => updateItem(index, 'weight', parseFloat(e.target.value) || 0)}
+                  data-testid={`item-weight-${index}`}
+                />
                 
-                <div className="text-right">
-                  <span className="text-sm text-muted-foreground">Amount: </span>
-                  <span className="font-semibold" data-testid={`item-amount-${index}`}>
-                    ₹{item.amount.toLocaleString('en-IN')}
-                  </span>
-                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Additional Charges */}
+        {/* Payment Type */}
         <div>
-          <Label>Additional Charges</Label>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="making-charges" className="text-sm">Making Charges (₹)</Label>
-              <Input
-                id="making-charges"
-                type="number"
-                placeholder="Making Charges"
-                value={invoiceData.makingCharges || ""}
-                onChange={(e) => setInvoiceData({ 
-                  ...invoiceData, 
-                  makingCharges: parseFloat(e.target.value) || 0 
-                })}
-                data-testid="making-charges-input"
-              />
-            </div>
-            <div>
-              <Label htmlFor="tax-percentage" className="text-sm">Tax (%)</Label>
-              <Input
-                id="tax-percentage"
-                type="number"
-                step="0.1"
-                placeholder="Tax %"
-                value={invoiceData.taxPercentage || ""}
-                onChange={(e) => setInvoiceData({ 
-                  ...invoiceData, 
-                  taxPercentage: parseFloat(e.target.value) || 0 
-                })}
-                data-testid="tax-percentage-input"
-              />
-            </div>
-          </div>
+          <Label>Payment Type</Label>
+          <Select 
+            value={invoiceData.paymentType} 
+            onValueChange={(value: "gold" | "cash") => setInvoiceData({ ...invoiceData, paymentType: value })}
+            data-testid="payment-type-select"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select payment type..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cash">Cash Payment</SelectItem>
+              <SelectItem value="gold">Gold Exchange</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Generate Invoice */}

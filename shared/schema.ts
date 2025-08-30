@@ -30,13 +30,8 @@ export const invoices = pgTable("invoices", {
   invoiceNumber: varchar("invoice_number").notNull().unique(),
   customerId: varchar("customer_id").references(() => customers.id).notNull(),
   items: jsonb("items").notNull(),
-  subtotal: decimal("subtotal", { precision: 12, scale: 2 }).notNull(),
-  makingCharges: decimal("making_charges", { precision: 10, scale: 2 }).default("0"),
-  taxPercentage: decimal("tax_percentage", { precision: 5, scale: 2 }).default("3"),
-  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).notNull(),
-  total: decimal("total", { precision: 12, scale: 2 }).notNull(),
+  paymentType: varchar("payment_type", { length: 10 }).default("cash"), // "gold" or "cash"
   status: varchar("status", { length: 20 }).default("pending"),
-  dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -84,9 +79,6 @@ export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 
 export interface InvoiceItem {
-  description: string;
+  itemName: string;
   weight: number;
-  purity: number;
-  rate: number;
-  amount: number;
 }

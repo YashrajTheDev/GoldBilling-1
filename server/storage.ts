@@ -186,20 +186,18 @@ export class DatabaseStorage implements IStorage {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const [customerCount, todayInvoicesResult, revenueResult, goldResult] = await Promise.all([
+    const [customerCount, todayInvoicesResult, goldResult] = await Promise.all([
       db.select({ count: count() }).from(customers),
-      db.select({ count: count() }).from(invoices).where(eq(invoices.status, 'paid')),
-      db.select({ total: invoices.total }).from(invoices).where(eq(invoices.status, 'paid')),
+      db.select({ count: count() }).from(invoices),
       db.select({ weight: goldCalculations.weight }).from(goldCalculations)
     ]);
     
-    const totalRevenue = revenueResult.reduce((sum, inv) => sum + parseFloat(inv.total.toString()), 0);
     const goldProcessed = goldResult.reduce((sum, calc) => sum + parseFloat(calc.weight.toString()), 0);
     
     return {
       totalCustomers: customerCount[0]?.count || 0,
       todayInvoices: todayInvoicesResult[0]?.count || 0,
-      totalRevenue: totalRevenue.toFixed(2),
+      totalRevenue: "0.00", // Not applicable for gold merchant
       goldProcessed: goldProcessed.toFixed(1)
     };
   }

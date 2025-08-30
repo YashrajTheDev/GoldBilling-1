@@ -138,7 +138,7 @@ export default function History() {
                   <th className="text-left px-6 py-4 font-medium text-foreground">Invoice #</th>
                   <th className="text-left px-6 py-4 font-medium text-foreground">Customer</th>
                   <th className="text-left px-6 py-4 font-medium text-foreground">Date</th>
-                  <th className="text-right px-6 py-4 font-medium text-foreground">Amount</th>
+                  <th className="text-right px-6 py-4 font-medium text-foreground">Payment Type</th>
                   <th className="text-center px-6 py-4 font-medium text-foreground">Status</th>
                   <th className="text-center px-6 py-4 font-medium text-foreground">Actions</th>
                 </tr>
@@ -164,8 +164,8 @@ export default function History() {
                     <td className="px-6 py-4 text-muted-foreground" data-testid={`invoice-date-${index}`}>
                       {new Date(invoice.createdAt!).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-right font-semibold text-foreground" data-testid={`invoice-amount-${index}`}>
-                      ₹{Number(invoice.total).toLocaleString('en-IN')}
+                    <td className="px-6 py-4 text-right font-semibold text-foreground" data-testid={`invoice-payment-${index}`}>
+                      {invoice.paymentType === "gold" ? "Gold Exchange" : "Cash Payment"}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {getStatusBadge(invoice.status!)}
