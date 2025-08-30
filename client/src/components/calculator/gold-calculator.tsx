@@ -15,9 +15,7 @@ import type { Customer } from "@shared/schema";
 interface CalculationResult {
   weight: number;
   purity: number;
-  goldRate: number;
   pureGoldWeight: number;
-  totalValue: number;
 }
 
 export default function GoldCalculator() {
@@ -27,7 +25,6 @@ export default function GoldCalculator() {
   const [customerId, setCustomerId] = useState("");
   const [weight, setWeight] = useState("");
   const [purity, setPurity] = useState("");
-  const [goldRate, setGoldRate] = useState(DEFAULT_GOLD_RATE.toString());
   const [description, setDescription] = useState("");
   const [result, setResult] = useState<CalculationResult | null>(null);
 
@@ -60,9 +57,8 @@ export default function GoldCalculator() {
   const handleCalculate = () => {
     const weightNum = parseFloat(weight);
     const purityNum = parseFloat(purity);
-    const rateNum = parseFloat(goldRate);
 
-    if (!weightNum || !purityNum || !rateNum) {
+    if (!weightNum || !purityNum) {
       toast({
         title: "Please fill all required fields",
         variant: "destructive"
@@ -79,14 +75,11 @@ export default function GoldCalculator() {
     }
 
     const pureGoldWeight = (weightNum * purityNum) / 100;
-    const totalValue = pureGoldWeight * rateNum;
 
     setResult({
       weight: weightNum,
       purity: purityNum,
-      goldRate: rateNum,
-      pureGoldWeight,
-      totalValue
+      pureGoldWeight
     });
   };
 
@@ -103,7 +96,7 @@ export default function GoldCalculator() {
       customerId: customerId || null,
       weight: result.weight.toString(),
       purity: result.purity.toString(),
-      goldRate: result.goldRate.toString(),
+      goldRate: "0",
       description: description || null,
     });
   };
@@ -179,17 +172,6 @@ export default function GoldCalculator() {
             />
           </div>
 
-          {/* Current Gold Rate */}
-          <div>
-            <Label htmlFor="gold-rate">Current Gold Rate (₹/gram) *</Label>
-            <Input
-              id="gold-rate"
-              type="number"
-              value={goldRate}
-              onChange={(e) => setGoldRate(e.target.value)}
-              data-testid="gold-rate-input"
-            />
-          </div>
 
           {/* Description */}
           <div>
@@ -232,16 +214,12 @@ export default function GoldCalculator() {
                   <p className="text-sm text-muted-foreground">Pure Gold Weight</p>
                   <p className="font-semibold text-foreground" data-testid="result-pure-weight">{result.pureGoldWeight.toFixed(2)}g</p>
                 </div>
-                <div className="bg-card p-3 rounded-md">
-                  <p className="text-sm text-muted-foreground">Rate per gram</p>
-                  <p className="font-semibold text-foreground" data-testid="result-rate">₹{result.goldRate.toLocaleString('en-IN')}</p>
-                </div>
               </div>
               
               <div className="bg-primary/10 p-4 rounded-md text-center">
-                <p className="text-sm text-muted-foreground mb-1">Total Value</p>
-                <p className="text-2xl font-bold text-primary" data-testid="result-total-value">
-                  ₹{result.totalValue.toLocaleString('en-IN')}
+                <p className="text-sm text-muted-foreground mb-1">Pure Gold Weight</p>
+                <p className="text-2xl font-bold text-primary" data-testid="result-pure-gold-weight">
+                  {result.pureGoldWeight.toFixed(3)}g
                 </p>
               </div>
 

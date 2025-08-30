@@ -146,7 +146,7 @@ export default function Customers() {
       {customers.length === 0 && (
         <Card>
           <CardContent className="p-8 text-center">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">No customers found</h3>
             <p className="text-muted-foreground" data-testid="no-customers-message">
               {search ? "Try adjusting your search criteria" : "Add your first customer to get started"}

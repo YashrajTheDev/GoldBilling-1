@@ -43,19 +43,21 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getCustomers(search?: string, limit = 50, offset = 0): Promise<{ customers: Customer[], total: number }> {
-    let query = db.select().from(customers);
-    let countQuery = db.select({ count: count() }).from(customers);
+    const baseQuery = db.select().from(customers);
+    const baseCountQuery = db.select({ count: count() }).from(customers);
     
     if (search) {
       const searchCondition = like(customers.name, `%${search}%`);
-      query = query.where(searchCondition);
-      countQuery = countQuery.where(searchCondition);
+      const searchResults = await baseQuery.where(searchCondition).limit(limit).offset(offset).orderBy(customers.name);
+      const searchCount = await baseCountQuery.where(searchCondition);
+      return {
+        customers: searchResults,
+        total: searchCount[0]?.count || 0
+      };
     }
     
-    const [customerResults, totalResults] = await Promise.all([
-      query.limit(limit).offset(offset).orderBy(customers.name),
-      countQuery
-    ]);
+    const customerResults = await baseQuery.limit(limit).offset(offset).orderBy(customers.name);
+    const totalResults = await baseCountQuery;
     
     return {
       customers: customerResults,
@@ -82,13 +84,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCalculations(customerId?: string, limit = 10): Promise<GoldCalculation[]> {
-    let query = db.select().from(goldCalculations);
+    const baseQuery = db.select().from(goldCalculations);
     
     if (customerId) {
-      query = query.where(eq(goldCalculations.customerId, customerId));
+      return await baseQuery.where(eq(goldCalculations.customerId, customerId)).limit(limit).orderBy(desc(goldCalculations.createdAt));
     }
     
-    return await query.limit(limit).orderBy(desc(goldCalculations.createdAt));
+    return await baseQuery.limit(limit).orderBy(desc(goldCalculations.createdAt));
   }
 
   async createCalculation(insertCalculation: InsertGoldCalculation): Promise<GoldCalculation> {

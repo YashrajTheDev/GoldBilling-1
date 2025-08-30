@@ -16,6 +16,7 @@ import {
 export default function Dashboard() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
+    queryFn: () => fetch("/api/dashboard/stats").then(res => res.json()),
   });
 
   const { data: recentCalculations, isLoading: calculationsLoading } = useQuery({
