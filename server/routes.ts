@@ -1,16 +1,39 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import { 
   insertCustomerSchema, 
   insertGoldCalculationSchema, 
   insertInvoiceSchema 
 } from "@shared/schema";
 import { z } from "zod";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication
+  setupAuth(app);
+  
   // Initialize sample data on startup
   await storage.initializeSampleData();
+  
+  // Create default user if not exists
+  const existingUser = await storage.getUserByUsername("yashraj");
+  if (!existingUser) {
+    await storage.createUser({
+      username: "yashraj",
+      password: await hashPassword("Yashraj@6230")
+    });
+  }
 
   // Customer routes
   app.get("/api/customers", async (req, res) => {

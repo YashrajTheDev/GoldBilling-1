@@ -3,6 +3,13 @@ import { pgTable, text, varchar, decimal, timestamp, integer, jsonb } from "driz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: varchar("username").notNull().unique(),
+  password: varchar("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const customers = pgTable("customers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   customerId: varchar("customer_id").notNull().unique(),
@@ -30,7 +37,7 @@ export const invoices = pgTable("invoices", {
   invoiceNumber: varchar("invoice_number").notNull().unique(),
   customerId: varchar("customer_id").references(() => customers.id).notNull(),
   items: jsonb("items").notNull(),
-  paymentType: varchar("payment_type", { length: 10 }).default("cash"), // "gold" or "cash"
+  paymentDetails: text("payment_details"), // Optional description like "50% gold + 50% cash" or "Full gold exchange"
   status: varchar("status", { length: 20 }).default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -71,12 +78,19 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   invoiceNumber: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type Customer = typeof customers.$inferSelect;
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 export type GoldCalculation = typeof goldCalculations.$inferSelect;
 export type InsertGoldCalculation = z.infer<typeof insertGoldCalculationSchema>;
 export type Invoice = typeof invoices.$inferSelect;
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export interface InvoiceItem {
   itemName: string;

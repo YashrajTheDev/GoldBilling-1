@@ -34,7 +34,7 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
       setInvoiceData({
         customerId: "",
         items: [],
-        paymentType: "cash",
+        paymentDetails: "",
       });
     },
     onError: () => {
@@ -90,7 +90,7 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
     createInvoice.mutate({
       customerId: invoiceData.customerId,
       items: invoiceData.items,
-      paymentType: invoiceData.paymentType,
+      paymentDetails: invoiceData.paymentDetails,
       status: "pending",
     });
   };
@@ -176,22 +176,16 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
           </div>
         </div>
 
-        {/* Payment Type */}
+        {/* Payment Details */}
         <div>
-          <Label>Payment Type</Label>
-          <Select 
-            value={invoiceData.paymentType} 
-            onValueChange={(value: "gold" | "cash") => setInvoiceData({ ...invoiceData, paymentType: value })}
-            data-testid="payment-type-select"
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select payment type..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cash">Cash Payment</SelectItem>
-              <SelectItem value="gold">Gold Exchange</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="payment-details">Payment Details (Optional)</Label>
+          <Input
+            id="payment-details"
+            placeholder="e.g., 50% gold + 50% cash, Full gold exchange, Cash payment"
+            value={invoiceData.paymentDetails || ""}
+            onChange={(e) => setInvoiceData({ ...invoiceData, paymentDetails: e.target.value })}
+            data-testid="payment-details-input"
+          />
         </div>
 
         {/* Generate Invoice */}

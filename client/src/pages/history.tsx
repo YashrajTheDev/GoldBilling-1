@@ -165,7 +165,7 @@ export default function History() {
                       {new Date(invoice.createdAt!).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right font-semibold text-foreground" data-testid={`invoice-payment-${index}`}>
-                      {invoice.paymentType === "gold" ? "Gold Exchange" : "Cash Payment"}
+                      {invoice.paymentDetails || "Not specified"}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {getStatusBadge(invoice.status!)}
