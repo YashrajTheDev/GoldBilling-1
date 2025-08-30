@@ -57,8 +57,7 @@ export default function Calculator() {
                   <th className="text-left py-2 text-foreground">Customer</th>
                   <th className="text-left py-2 text-foreground">Weight (g)</th>
                   <th className="text-left py-2 text-foreground">Purity (%)</th>
-                  <th className="text-left py-2 text-foreground">Rate (₹)</th>
-                  <th className="text-left py-2 text-foreground">Value (₹)</th>
+                  <th className="text-left py-2 text-foreground">Pure Gold (g)</th>
                   <th className="text-left py-2 text-foreground">Date</th>
                 </tr>
               </thead>
@@ -70,9 +69,8 @@ export default function Calculator() {
                     </td>
                     <td className="py-2" data-testid={`calc-weight-${index}`}>{calc.weight}</td>
                     <td className="py-2" data-testid={`calc-purity-${index}`}>{calc.purity}%</td>
-                    <td className="py-2" data-testid={`calc-rate-${index}`}>₹{Number(calc.goldRate).toLocaleString('en-IN')}</td>
-                    <td className="py-2 font-semibold text-primary" data-testid={`calc-value-${index}`}>
-                      ₹{Number(calc.totalValue).toLocaleString('en-IN')}
+                    <td className="py-2 font-semibold text-primary" data-testid={`calc-pure-gold-${index}`}>
+                      {Number(calc.pureGoldWeight).toFixed(3)}g
                     </td>
                     <td className="py-2" data-testid={`calc-date-${index}`}>
                       {new Date(calc.createdAt!).toLocaleDateString()}

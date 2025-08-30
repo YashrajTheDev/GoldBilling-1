@@ -96,17 +96,14 @@ export class DatabaseStorage implements IStorage {
   async createCalculation(insertCalculation: InsertGoldCalculation): Promise<GoldCalculation> {
     const weight = parseFloat(insertCalculation.weight.toString());
     const purity = parseFloat(insertCalculation.purity.toString());
-    const goldRate = parseFloat(insertCalculation.goldRate.toString());
     
     const pureGoldWeight = (weight * purity) / 100;
-    const totalValue = pureGoldWeight * goldRate;
     
     const [calculation] = await db
       .insert(goldCalculations)
       .values({
         ...insertCalculation,
         pureGoldWeight: pureGoldWeight.toFixed(3),
-        totalValue: totalValue.toFixed(2),
       })
       .returning();
     return calculation;

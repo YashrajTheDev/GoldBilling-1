@@ -96,7 +96,6 @@ export default function GoldCalculator() {
       customerId: customerId === "none" ? null : customerId || null,
       weight: result.weight.toString(),
       purity: result.purity.toString(),
-      goldRate: "0",
       description: description || null,
     });
   };

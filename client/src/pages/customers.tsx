@@ -1,16 +1,33 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import { UserPlus, Search, ArrowRight, Phone, Mail, MapPin } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 import type { Customer } from "@shared/schema";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    customerId: "",
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+    city: "",
+    state: ""
+  });
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["/api/customers", search],
@@ -18,6 +35,43 @@ export default function Customers() {
   });
 
   const customers = data?.customers || [];
+
+  const createCustomer = useMutation({
+    mutationFn: (data: any) => apiRequest("POST", "/api/customers", data),
+    onSuccess: () => {
+      toast({ title: "Customer added successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/customers"] });
+      setIsDialogOpen(false);
+      setNewCustomer({
+        customerId: "",
+        name: "",
+        phone: "",
+        email: "",
+        address: "",
+        city: "",
+        state: ""
+      });
+    },
+    onError: () => {
+      toast({ 
+        title: "Failed to add customer",
+        description: "Please try again.",
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!newCustomer.customerId || !newCustomer.name || !newCustomer.phone) {
+      toast({
+        title: "Please fill required fields",
+        description: "Customer ID, Name, and Phone are required.",
+        variant: "destructive"
+      });
+      return;
+    }
+    createCustomer.mutate(newCustomer);
+  };
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -72,10 +126,118 @@ export default function Customers() {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            <Button data-testid="add-customer-button">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Customer
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button data-testid="add-customer-button">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add Customer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Customer</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="customer-id">Customer ID *</Label>
+                      <Input
+                        id="customer-id"
+                        placeholder="CU001"
+                        value={newCustomer.customerId}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, customerId: e.target.value })}
+                        data-testid="new-customer-id"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customer-name">Name *</Label>
+                      <Input
+                        id="customer-name"
+                        placeholder="Customer Name"
+                        value={newCustomer.name}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                        data-testid="new-customer-name"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="customer-phone">Phone *</Label>
+                      <Input
+                        id="customer-phone"
+                        placeholder="+91 98765 43210"
+                        value={newCustomer.phone}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                        data-testid="new-customer-phone"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customer-email">Email</Label>
+                      <Input
+                        id="customer-email"
+                        type="email"
+                        placeholder="customer@email.com"
+                        value={newCustomer.email}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                        data-testid="new-customer-email"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="customer-address">Address</Label>
+                    <Input
+                      id="customer-address"
+                      placeholder="Street Address"
+                      value={newCustomer.address}
+                      onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                      data-testid="new-customer-address"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="customer-city">City</Label>
+                      <Input
+                        id="customer-city"
+                        placeholder="City"
+                        value={newCustomer.city}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })}
+                        data-testid="new-customer-city"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customer-state">State</Label>
+                      <Input
+                        id="customer-state"
+                        placeholder="State"
+                        value={newCustomer.state}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, state: e.target.value })}
+                        data-testid="new-customer-state"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                      data-testid="cancel-customer"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleSubmit}
+                      disabled={createCustomer.isPending}
+                      data-testid="save-customer"
+                    >
+                      {createCustomer.isPending ? "Adding..." : "Add Customer"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>

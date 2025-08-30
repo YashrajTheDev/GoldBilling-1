@@ -20,9 +20,7 @@ export const goldCalculations = pgTable("gold_calculations", {
   customerId: varchar("customer_id").references(() => customers.id),
   weight: decimal("weight", { precision: 10, scale: 3 }).notNull(),
   purity: decimal("purity", { precision: 5, scale: 2 }).notNull(),
-  goldRate: decimal("gold_rate", { precision: 10, scale: 2 }).notNull(),
   pureGoldWeight: decimal("pure_gold_weight", { precision: 10, scale: 3 }).notNull(),
-  totalValue: decimal("total_value", { precision: 12, scale: 2 }).notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -70,7 +68,6 @@ export const insertGoldCalculationSchema = createInsertSchema(goldCalculations).
   id: true,
   createdAt: true,
   pureGoldWeight: true,
-  totalValue: true,
 });
 
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
