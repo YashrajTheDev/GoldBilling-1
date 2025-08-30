@@ -93,7 +93,7 @@ export default function GoldCalculator() {
     }
 
     saveCalculation.mutate({
-      customerId: customerId || null,
+      customerId: customerId === "none" ? null : customerId || null,
       weight: result.weight.toString(),
       purity: result.purity.toString(),
       goldRate: "0",
@@ -120,9 +120,9 @@ export default function GoldCalculator() {
                 <SelectValue placeholder="Choose customer..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No customer selected</SelectItem>
+                <SelectItem value="none">No customer selected</SelectItem>
                 {customers?.customers?.map((customer: Customer) => (
-                  <SelectItem key={customer.id} value={customer.id}>
+                  <SelectItem key={customer.id} value={customer.id || "unknown"}>
                     {customer.name} ({customer.customerId})
                   </SelectItem>
                 ))}

@@ -138,7 +138,7 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
             </SelectTrigger>
             <SelectContent>
               {customers?.customers?.map((customer: Customer) => (
-                <SelectItem key={customer.id} value={customer.id}>
+                <SelectItem key={customer.id} value={customer.id || "unknown"}>
                   {customer.name} ({customer.customerId})
                 </SelectItem>
               ))}

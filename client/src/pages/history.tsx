@@ -15,16 +15,16 @@ interface InvoiceWithCustomer extends Invoice {
 
 export default function History() {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [customerFilter, setCustomerFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all-status");
+  const [customerFilter, setCustomerFilter] = useState("all");
 
   const { data, isLoading } = useQuery({
     queryKey: ["/api/invoices", search, statusFilter, customerFilter],
     queryFn: () => {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
-      if (statusFilter) params.append("status", statusFilter);
-      if (customerFilter) params.append("customerId", customerFilter);
+      if (statusFilter && statusFilter !== "all-status") params.append("status", statusFilter);
+      if (customerFilter && customerFilter !== "all") params.append("customerId", customerFilter);
       params.append("limit", "50");
       
       return fetch(`/api/invoices?${params.toString()}`).then(res => res.json());
@@ -98,9 +98,9 @@ export default function History() {
                 <SelectValue placeholder="All Customers" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Customers</SelectItem>
+                <SelectItem value="all">All Customers</SelectItem>
                 {customers?.customers?.map((customer: Customer) => (
-                  <SelectItem key={customer.id} value={customer.id}>
+                  <SelectItem key={customer.id} value={customer.id || "unknown"}>
                     {customer.name}
                   </SelectItem>
                 ))}
@@ -112,7 +112,7 @@ export default function History() {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all-status">All Status</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="overdue">Overdue</SelectItem>
