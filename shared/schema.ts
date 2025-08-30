@@ -94,5 +94,9 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export interface InvoiceItem {
   itemName: string;
-  weight: number;
+  pieces: number;
+  netWeight: number;
+  touch: number; // purity percentage
+  fineGold: number; // calculated fine gold weight
+  oldBalance?: number; // optional old balance
 }

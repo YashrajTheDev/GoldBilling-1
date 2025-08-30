@@ -49,7 +49,11 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
   const addItem = () => {
     const newItem: InvoiceItem = {
       itemName: "",
-      weight: 0,
+      pieces: 1,
+      netWeight: 0,
+      touch: 0,
+      fineGold: 0,
+      oldBalance: 0,
     };
     setInvoiceData({
       ...invoiceData,
@@ -60,6 +64,15 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
   const updateItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
     const updatedItems = [...invoiceData.items];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
+    
+    // Auto-calculate fine gold when net weight or touch changes
+    if (field === 'netWeight' || field === 'touch') {
+      const item = updatedItems[index];
+      const netWeight = field === 'netWeight' ? Number(value) : item.netWeight;
+      const touch = field === 'touch' ? Number(value) : item.touch;
+      updatedItems[index].fineGold = (netWeight * touch) / 100;
+    }
+    
     setInvoiceData({ ...invoiceData, items: updatedItems });
   };
 
@@ -162,14 +175,51 @@ export default function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceForm
                   data-testid={`item-name-${index}`}
                 />
                 
-                <Input
-                  type="number"
-                  step="0.001"
-                  placeholder="Weight (grams)"
-                  value={item.weight || ""}
-                  onChange={(e) => updateItem(index, 'weight', parseFloat(e.target.value) || 0)}
-                  data-testid={`item-weight-${index}`}
-                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Pieces"
+                    value={item.pieces || ""}
+                    onChange={(e) => updateItem(index, 'pieces', parseInt(e.target.value) || 1)}
+                    data-testid={`item-pieces-${index}`}
+                  />
+                  <Input
+                    type="number"
+                    step="0.001"
+                    placeholder="Net Weight (g)"
+                    value={item.netWeight || ""}
+                    onChange={(e) => updateItem(index, 'netWeight', parseFloat(e.target.value) || 0)}
+                    data-testid={`item-net-weight-${index}`}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Touch %"
+                    value={item.touch || ""}
+                    onChange={(e) => updateItem(index, 'touch', parseFloat(e.target.value) || 0)}
+                    data-testid={`item-touch-${index}`}
+                  />
+                  <Input
+                    type="number"
+                    step="0.001"
+                    placeholder="Fine Gold (auto)"
+                    value={item.fineGold?.toFixed(3) || "0.000"}
+                    readOnly
+                    className="bg-muted"
+                    data-testid={`item-fine-gold-${index}`}
+                  />
+                  <Input
+                    type="number"
+                    step="0.001"
+                    placeholder="Old Balance (opt)"
+                    value={item.oldBalance || ""}
+                    onChange={(e) => updateItem(index, 'oldBalance', parseFloat(e.target.value) || 0)}
+                    data-testid={`item-old-balance-${index}`}
+                  />
+                </div>
                 
               </div>
             ))}

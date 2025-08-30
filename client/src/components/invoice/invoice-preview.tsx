@@ -23,7 +23,9 @@ export default function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
   const customer = customerData as Customer;
   
-  const totalWeight = invoiceData.items.reduce((sum, item) => sum + (item.weight || 0), 0);
+  const totalNetWeight = invoiceData.items.reduce((sum, item) => sum + (item.netWeight || 0), 0);
+  const totalFineGold = invoiceData.items.reduce((sum, item) => sum + (item.fineGold || 0), 0);
+  const totalPieces = invoiceData.items.reduce((sum, item) => sum + (item.pieces || 0), 0);
 
   const handlePrint = () => {
     window.print();
@@ -37,10 +39,10 @@ export default function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
     
     // Create invoice summary for WhatsApp
     const itemsList = invoiceData.items.map(item => 
-      `• ${item.itemName}: ${item.weight}g`
+      `• ${item.itemName} (${item.pieces}pcs): ${item.netWeight}g net, ${item.touch}% touch, ${item.fineGold.toFixed(3)}g fine${item.oldBalance ? `, old: ${item.oldBalance}g` : ''}`
     ).join('\n');
     
-    const message = `*GoldBill Pro Invoice*\n\nCustomer: ${customer.name}\nDate: ${new Date().toLocaleDateString()}\n\n*Items:*\n${itemsList}\n\nTotal Weight: ${totalWeight.toFixed(3)}g${invoiceData.paymentDetails ? `\nPayment: ${invoiceData.paymentDetails}` : ''}\n\nThank you for your business!`;
+    const message = `*GoldBill Pro Invoice*\n\nCustomer: ${customer.name}\nDate: ${new Date().toLocaleDateString()}\n\n*Items:*\n${itemsList}\n\n*Summary:*\nTotal Pieces: ${totalPieces}\nTotal Net Weight: ${totalNetWeight.toFixed(3)}g\nTotal Fine Gold: ${totalFineGold.toFixed(3)}g${invoiceData.paymentDetails ? `\nPayment: ${invoiceData.paymentDetails}` : ''}\n\nThank you for your business!`;
     
     const whatsappUrl = `https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -99,11 +101,15 @@ export default function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
         {/* Invoice Items Table */}
         <div className="mb-8">
-          <table className="w-full">
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-3 text-foreground">Item Name</th>
-                <th className="text-center py-3 text-foreground">Weight (grams)</th>
+                <th className="text-center py-3 text-foreground">Pieces</th>
+                <th className="text-center py-3 text-foreground">Net Weight</th>
+                <th className="text-center py-3 text-foreground">Touch %</th>
+                <th className="text-center py-3 text-foreground">Fine Gold</th>
+                <th className="text-center py-3 text-foreground">Old Balance</th>
               </tr>
             </thead>
             <tbody>
@@ -112,14 +118,26 @@ export default function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
                   <td className="py-3" data-testid={`item-name-${index}`}>
                     {item.itemName || "Item Name"}
                   </td>
-                  <td className="text-center py-3" data-testid={`item-weight-${index}`}>
-                    {item.weight || 0}g
+                  <td className="text-center py-3" data-testid={`item-pieces-${index}`}>
+                    {item.pieces || 0}
+                  </td>
+                  <td className="text-center py-3" data-testid={`item-net-weight-${index}`}>
+                    {item.netWeight || 0}g
+                  </td>
+                  <td className="text-center py-3" data-testid={`item-touch-${index}`}>
+                    {item.touch || 0}%
+                  </td>
+                  <td className="text-center py-3 font-semibold" data-testid={`item-fine-gold-${index}`}>
+                    {item.fineGold?.toFixed(3) || "0.000"}g
+                  </td>
+                  <td className="text-center py-3" data-testid={`item-old-balance-${index}`}>
+                    {item.oldBalance ? `${item.oldBalance}g` : "-"}
                   </td>
                 </tr>
               ))}
               {invoiceData.items.length === 0 && (
                 <tr>
-                  <td colSpan={2} className="py-8 text-center text-muted-foreground" data-testid="no-items">
+                  <td colSpan={6} className="py-8 text-center text-muted-foreground" data-testid="no-items">
                     No items added yet
                   </td>
                 </tr>
@@ -130,12 +148,25 @@ export default function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
         {/* Summary */}
         <div className="flex justify-end mb-8">
-          <div className="w-64">
+          <div className="w-80">
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="font-semibold text-foreground">Total Weight:</span>
-                <span className="font-bold text-primary text-lg" data-testid="invoice-total-weight">
-                  {totalWeight.toFixed(3)}g
+                <span className="text-muted-foreground">Total Pieces:</span>
+                <span className="font-medium" data-testid="invoice-total-pieces">
+                  {totalPieces}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total Net Weight:</span>
+                <span className="font-medium" data-testid="invoice-total-net-weight">
+                  {totalNetWeight.toFixed(3)}g
+                </span>
+              </div>
+              <Separator />
+              <div className="flex justify-between">
+                <span className="font-semibold text-foreground">Total Fine Gold:</span>
+                <span className="font-bold text-primary text-lg" data-testid="invoice-total-fine-gold">
+                  {totalFineGold.toFixed(3)}g
                 </span>
               </div>
               {invoiceData.paymentDetails && (
